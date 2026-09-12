@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ar" dir="rtl" class="h-full bg-gray-100 text-gray-800">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google Maps</title>
+    <meta
+      name="description"
+      content="Find local businesses, view maps and get driving directions in Google Maps."
+    />
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet OpenStreetMap CSS & JS -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <!-- FontAwesome / Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Roboto / Google Sans Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        font-family: "Noto Sans Arabic", "Roboto", sans-serif;
+        overflow: hidden;
+      }
+      #map {
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+      /* Custom Google Maps Marker styling */
+      .gmaps-pin {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .gmaps-pin-inner {
+        width: 28px;
+        height: 28px;
+        background-color: #ea4335;
+        border-radius: 50% 50% 50% 0;
+        transform: rotate(-45deg);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #ffffff;
+      }
+      .gmaps-pin-dot {
+        width: 10px;
+        height: 10px;
+        background-color: #ffffff;
+        border-radius: 50%;
+        transform: rotate(45deg);
+      }
+      /* Clean Leaflet Controls Override to look like Google Maps */
+      .leaflet-control-zoom {
+        border: none !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+      }
+      .leaflet-control-zoom-in,
+      .leaflet-control-zoom-out {
+        background-color: #ffffff !important;
+        color: #5f6368 !important;
+        border: none !important;
+        width: 40px !important;
+        height: 40px !important;
+        line-height: 40px !important;
+        font-size: 18px !important;
+        font-weight: bold;
+      }
+      .leaflet-control-zoom-in {
+        border-bottom: 1px solid #e6e6e6 !important;
+      }
+      .gmaps-shadow {
+        box-shadow:
+          0 2px 6px rgba(60, 64, 67, 0.3),
+          0 1px 2px rgba(60, 64, 67, 0.15);
+      }
+    </style>
+  </head>
+  <body class="h-full w-full relative m-0 p-0 overflow-hidden bg-gray-100">
+    <!-- Fullscreen Map Background -->
+    <div id="map"></div>
+
+    <!-- Top Left Search Widget (Google Maps Replica) -->
+    <div
+      class="absolute top-3 right-3 sm:right-4 z-20 w-[calc(100%-24px)] sm:w-[390px] flex flex-col space-y-2"
+    >
+      <!-- Search Box Bar -->
+      <div
+        class="bg-white rounded-full sm:rounded-2xl h-12 px-4 flex items-center gmaps-shadow space-x-3 space-x-reverse transition-all"
+      >
+        <button
+          class="p-1 hover:bg-gray-100 rounded-full text-gray-600 transition"
+          title="القائمة"
+        >
+          <i data-lucide="menu" class="w-5 h-5"></i>
+        </button>
+        <input
+          id="search-input"
+          type="text"
+          placeholder="البحث في خرائط Google"
+          class="flex-1 bg-transparent border-none outline-none text-sm text-gray-800 placeholder-gray-500 font-medium px-2"
+          value="موقعي الحالي"
+        />
+        <button
+          class="p-2 hover:bg-gray-100 rounded-full text-blue-600 transition"
+          title="بحث"
+        >
+          <i data-lucide="search" class="w-5 h-5"></i>
+        </button>
+        <div class="h-5 w-[1px] bg-gray-200"></div>
+        <button
+          id="directions-btn"
+          class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full transition shadow-md"
+          title="الاتجاهات"
+        >
+          <i data-lucide="navigation" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <!-- Quick Category Chips -->
+      <div
+        class="flex items-center space-x-2 space-x-reverse overflow-x-auto py-1 no-scrollbar text-xs font-medium text-gray-700"
+      >
+        <button
+          class="bg-white hover:bg-gray-50 px-3 py-1.5 rounded-full gmaps-shadow flex items-center space-x-1.5 space-x-reverse shrink-0 border border-gray-200"
+        >
+          <i data-lucide="utensils" class="w-3.5 h-3.5 text-red-500"></i>
+          <span>مطاعم</span>
+        </button>
+        <button
+          class="bg-white hover:bg-gray-50 px-3 py-1.5 rounded-full gmaps-shadow flex items-center space-x-1.5 space-x-reverse shrink-0 border border-gray-200"
+        >
+          <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-600"></i>
+          <span>مقاهي</span>
+        </button>
+        <button
+          class="bg-white hover:bg-gray-50 px-3 py-1.5 rounded-full gmaps-shadow flex items-center space-x-1.5 space-x-reverse shrink-0 border border-gray-200"
+        >
+          <i data-lucide="shopping-bag" class="w-3.5 h-3.5 text-blue-500"></i>
+          <span>تسوق</span>
+        </button>
+        <button
+          class="bg-white hover:bg-gray-50 px-3 py-1.5 rounded-full gmaps-shadow flex items-center space-x-1.5 space-x-reverse shrink-0 border border-gray-200"
+        >
+          <i data-lucide="fuel" class="w-3.5 h-3.5 text-green-600"></i>
+          <span>محطات وقود</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Google Maps Side Info Panel (Location Details Card) -->
+    <div
+      id="side-panel"
+      class="absolute top-24 right-3 sm:right-4 z-20 w-[calc(100%-24px)] sm:w-[390px] bg-white rounded-2xl gmaps-shadow overflow-hidden transition-all duration-300 transform max-h-[calc(100vh-120px)] flex flex-col"
+    >
+      <!-- Header Image Preview -->
+      <div
+        class="relative h-40 bg-gradient-to-r from-blue-600 to-indigo-700 flex items-center justify-center overflow-hidden"
+      >
+        <img
+          id="location-header-img"
+          src="https://images.unsplash.com/photo-1526778548025-fa2f459cd5c1?auto=format&fit=crop&w=600&q=80"
+          alt="Map View"
+          class="w-full h-full object-cover opacity-80"
+        />
+        <div
+          class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+        ></div>
+
+        <button
+          class="absolute top-3 left-3 bg-black/40 hover:bg-black/60 text-white p-1.5 rounded-full backdrop-blur-sm transition"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+
+        <div class="absolute bottom-3 right-4 left-4 text-white">
+          <span
+            class="text-[10px] font-semibold uppercase tracking-wider bg-blue-600/80 px-2 py-0.5 rounded-md backdrop-blur-sm"
+            >موقع التوصيل المحدد</span
+          >
+          <h2 id="place-title" class="text-lg font-bold mt-0.5 truncate">
+            جاري تحديد الموقع...
+          </h2>
+        </div>
+      </div>
+
+      <!-- Scrollable Location Details Body -->
+      <div class="p-4 overflow-y-auto space-y-4 flex-1 text-sm text-gray-700">
+        <!-- Action Buttons Bar (Directions, Save, Share) -->
+        <div
+          class="grid grid-cols-4 gap-2 border-b border-gray-100 pb-3 text-center"
+        >
+          <button
+            class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-blue-50 text-blue-600 font-medium transition"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center mb-1 shadow-sm"
+            >
+              <i data-lucide="navigation" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs">الاتجاهات</span>
+          </button>
+
+          <button
+            id="share-wa-btn"
+            class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-emerald-50 text-emerald-600 font-medium transition"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-emerald-600 text-white flex items-center justify-center mb-1 shadow-sm"
+            >
+              <i data-lucide="message-square" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs">واتساب</span>
+          </button>
+
+          <button
+            id="open-gmaps-btn"
+            class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-blue-50 text-blue-600 font-medium transition"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center mb-1 shadow-sm"
+            >
+              <i data-lucide="external-link" class="w-4 h-4 text-blue-600"></i>
+            </div>
+            <span class="text-xs">فتح الأصلي</span>
+          </button>
+
+          <button
+            class="flex flex-col items-center justify-center py-1.5 px-1 rounded-xl hover:bg-gray-50 text-gray-600 font-medium transition"
+          >
+            <div
+              class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-700 flex items-center justify-center mb-1 shadow-sm"
+            >
+              <i data-lucide="bookmark" class="w-4 h-4"></i>
+            </div>
+            <span class="text-xs">حفظ</span>
+          </button>
+        </div>
+
+        <!-- Address Info Row -->
+        <div class="flex items-start space-x-3 space-x-reverse py-1">
+          <i
+            data-lucide="map-pin"
+            class="w-5 h-5 text-red-500 shrink-0 mt-0.5"
+          ></i>
+          <div class="flex-1">
+            <span class="text-xs font-semibold text-gray-400 block uppercase"
+              >العنوان بالعربي</span
+            >
+            <p
+              id="place-address"
+              class="text-gray-900 font-medium leading-snug"
+            >
+              جاري التحقق من العنوان الجغرافي...
+            </p>
+          </div>
+        </div>
+
+        <!-- Coordinates Row -->
+        <div
+          class="flex items-center space-x-3 space-x-reverse py-1 border-t border-gray-100 pt-3"
+        >
+          <i data-lucide="compass" class="w-5 h-5 text-blue-500 shrink-0"></i>
+          <div class="flex-1 flex justify-between items-center">
+            <div>
+              <span class="text-xs font-semibold text-gray-400 block"
+                >الإحداثيات الجغرافية</span
+              >
+              <span
+                id="place-coords"
+                class="font-mono text-xs font-semibold text-gray-800"
+                >--.--, --.--</span
+              >
+            </div>
+            <span
+              id="accuracy-tag"
+              class="text-[11px] font-medium bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200"
+            >
+              دقة عالية GPS
+            </span>
+          </div>
+        </div>
+
+        <!-- System Sync Status Row -->
+        <div
+          class="flex items-center space-x-3 space-x-reverse py-1 border-t border-gray-100 pt-3 text-xs text-gray-500"
+        >
+          <i
+            data-lucide="cloud-check"
+            class="w-5 h-5 text-gray-400 shrink-0"
+          ></i>
+          <div class="flex-1 flex justify-between">
+            <span>حالة المزامنة بالنظام:</span>
+            <span id="sync-status" class="font-bold text-amber-600"
+              >جاري التسجيل...</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Map Control Buttons (Bottom Right - Google Maps Style) -->
+    <div class="absolute bottom-6 left-4 z-20 flex flex-col space-y-3">
+      <!-- Center My Location Button (Blue GPS Target) -->
+      <button
+        id="recenter-gps-btn"
+        onclick="requestLocation()"
+        class="w-10 h-10 bg-white hover:bg-gray-50 text-gray-700 rounded-full gmaps-shadow flex items-center justify-center transition border border-gray-100 group"
+        title="موقعي الحالي"
+      >
+        <i
+          data-lucide="crosshair"
+          class="w-5 h-5 text-gray-600 group-hover:text-blue-600 transition"
+        ></i>
+      </button>
+
+      <!-- Layer Toggle Button -->
+      <button
+        id="toggle-layer-btn"
+        class="w-10 h-10 bg-white hover:bg-gray-50 text-gray-700 rounded-full gmaps-shadow flex items-center justify-center transition border border-gray-100"
+        title="طبقات الخريطة"
+      >
+        <i data-lucide="layers" class="w-5 h-5 text-gray-600"></i>
+      </button>
+    </div>
+
+    <!-- Bottom Left Google Maps Logo -->
+    <div class="absolute bottom-4 right-4 z-20 pointer-events-none select-none">
+      <div
+        class="bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md gmaps-shadow flex items-center space-x-1 space-x-reverse text-xs font-bold text-gray-700"
+      >
+        <span class="text-blue-500">G</span>
+        <span class="text-red-500">o</span>
+        <span class="text-yellow-500">o</span>
+        <span class="text-blue-500">g</span>
+        <span class="text-green-500">l</span>
+        <span class="text-red-500">e</span>
+        <span class="text-gray-500 font-normal mr-1">Maps</span>
+      </div>
+    </div>
+
+    <!-- Map Initialization Script -->
+    <script>
+      let map;
+      let marker;
+      let currentLat = 30.0444;
+      let currentLng = 31.2357;
+
+      lucide.createIcons();
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initGoogleMap();
+        requestLocation();
+      });
+
+      function initGoogleMap() {
+        // Standard Google Maps Tile Layer
+        map = L.map("map", {
+          zoomControl: false,
+          attributionControl: false,
+        }).setView([currentLat, currentLng], 14);
+
+        L.control.zoom({ position: "bottomleft" }).addTo(map);
+
+        // Google Maps Tile URL (Authentic Google Maps tiles)
+        L.tileLayer("https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
+          maxZoom: 20,
+          subdomains: ["mt0", "mt1", "mt2", "mt3"],
+        }).addTo(map);
+      }
+
+      function requestLocation() {
+        if (!navigator.geolocation) {
+          document.getElementById("place-title").textContent =
+            "الخدمة غير مدعومة";
+          return;
+        }
+
+        document.getElementById("place-title").textContent =
+          "جاري تحديد موقعك الجغرافي...";
+        document.getElementById("sync-status").textContent = "جاري الاتصال...";
+
+        navigator.geolocation.getCurrentPosition(
+          onLocationFound,
+          onLocationError,
+          { enableHighAccuracy: true, timeout: 12000 },
+        );
+      }
+
+      async function onLocationFound(position) {
+        currentLat = position.coords.latitude;
+        currentLng = position.coords.longitude;
+
+        // Pan Map smoothly to user's precise location
+        map.flyTo([currentLat, currentLng], 17, { duration: 1.5 });
+
+        // Create Custom Google Maps Pin Icon
+        const gmapsIcon = L.divIcon({
+          className: "gmaps-pin",
+          html: '<div class="gmaps-pin-inner"><div class="gmaps-pin-dot"></div></div>',
+          iconSize: [30, 30],
+          iconAnchor: [15, 30],
+        });
+
+        if (marker) {
+          marker.setLatLng([currentLat, currentLng]);
+        } else {
+          marker = L.marker([currentLat, currentLng], {
+            icon: gmapsIcon,
+          }).addTo(map);
+        }
+
+        // Update UI Details
+        document.getElementById("place-coords").textContent =
+          `${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}`;
+
+        // Set Google Maps External & WhatsApp Links
+        const gmapsUrl = `https://www.google.com/maps?q=${currentLat},${currentLng}`;
+        document.getElementById("open-gmaps-btn").onclick = () =>
+          window.open(gmapsUrl, "_blank");
+
+        const waText = encodeURIComponent(
+          `مرحباً، موقعي المحدد على الخريطة هو:\n${gmapsUrl}`,
+        );
+        document.getElementById("share-wa-btn").onclick = () =>
+          window.open(`https://wa.me/?text=${waText}`, "_blank");
+
+        // Reverse Geocode for Address
+        const address = await reverseGeocode(currentLat, currentLng);
+        document.getElementById("place-title").textContent =
+          address.split(",")[0] || "موقع التسليم المباشر";
+        document.getElementById("place-address").textContent = address;
+        document.getElementById("search-input").value = address;
+
+        // Record to Backend & local json file
+        saveLocationData({
+          latitude: currentLat,
+          longitude: currentLng,
+          address: address,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+        });
+      }
+
+      function onLocationError(error) {
+        document.getElementById("place-title").textContent =
+          "تم رفض الوصول للموقع";
+        document.getElementById("place-address").textContent =
+          "يرجى السماح بصلاحية الموقع الجغرافي للبدء.";
+        document.getElementById("sync-status").textContent = "متوقف";
+      }
+
+      async function reverseGeocode(lat, lng) {
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=ar`,
+          );
+          if (!res.ok) throw new Error();
+          const data = await res.json();
+          return data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        } catch {
+          return `الإحداثيات: ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        }
+      }
+
+      async function saveLocationData(payload) {
+        try {
+          const res = await fetch("/api/location", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (res.ok) {
+            document.getElementById("sync-status").textContent =
+              "تم التسجيل بنجاح (JSON)";
+            document.getElementById("sync-status").className =
+              "font-bold text-emerald-600";
+          }
+        } catch (e) {
+          console.error("Log save error:", e);
+          document.getElementById("sync-status").textContent = "حفظ محلي";
+        }
+      }
+    </script>
+  </body>
+</html>
