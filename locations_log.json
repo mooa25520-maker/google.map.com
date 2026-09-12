@@ -1,0 +1,83 @@
+[
+  {
+    "id": 1789244666129,
+    "latitude": 30.56898919216344,
+    "longitude": 31.401429102460344,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T20:24:26.013Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789244578168,
+    "latitude": 30.569023525568035,
+    "longitude": 31.40146064481454,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T20:22:56.480Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789243518433,
+    "latitude": 30.56903548058624,
+    "longitude": 31.401314286754427,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T20:05:18.427Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789243151154,
+    "latitude": 30.56900860062236,
+    "longitude": 31.401433869686436,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:59:11.154Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789242873387,
+    "latitude": 30.569018803612018,
+    "longitude": 31.401436283886696,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:54:33.382Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789242845491,
+    "latitude": 30.568996565051744,
+    "longitude": 31.40144131509377,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:54:05.489Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789242834414,
+    "latitude": 30.56900696386678,
+    "longitude": 31.40144440018132,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:53:54.405Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789242709673,
+    "latitude": 30.56898919216344,
+    "longitude": 31.401429102460344,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:51:49.655Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  },
+  {
+    "id": 1789242702628,
+    "latitude": 30.56898919216344,
+    "longitude": 31.401429102460344,
+    "address": "الزقازيق, الشرقية, 44948, مصر",
+    "timestamp": "2026-09-12T19:51:42.609Z",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Safari/537.36",
+    "ip": "::1"
+  }
+]
